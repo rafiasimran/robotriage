@@ -18,7 +18,7 @@ Engineers usually find these patterns by scrolling through logs by hand. RoboTri
 
 1. **Reads the log** and skips garbled lines, but counts them so the report says how much couldn't be read.
 2. **Finds every stoppage**: from the fault to the moment the machine was back in automatic mode. A second alarm on a machine that is already stopped isn't counted twice.
-3. **Groups chains of faults**: stops that start within 10 seconds on different machines are treated as one event, and the first one is taken as the root cause.
+3. **Groups chains of faults**: when a fault that can spread (a power dip or a bus timeout) is followed within 10 seconds by stops on other machines, they are treated as one event with that fault as the root cause.
 4. **Charges downtime to the root cause.** A network timeout caused by a power dip counts as power downtime.
 5. **Ranks problems by production time lost** and adds first checks for the top one from a small fault knowledge base.
 6. **Flags problems that are getting worse**, comparing the first and second half of the period.
@@ -67,7 +67,7 @@ Options: `--window 10` sets how many seconds apart faults can be to count as one
 
 ## Tests
 
-13 tests. The unit tests cover the tricky cases one by one: double faults on a stopped machine, a missing RESUME line, a stop that never ends, a real chain versus two faults that just happen close together. The end-to-end test generates a full week and checks that the pipeline finds every problem hidden in it, for several random seeds.
+15 tests. The unit tests cover the tricky cases one by one: double faults on a stopped machine, a missing RESUME line, a stop that never ends, a real chain versus two faults that just happen close together. The end-to-end test generates a full week and checks that the pipeline finds every problem hidden in it, for several random seeds.
 
 ## Project structure
 
@@ -87,13 +87,14 @@ reports/         latest report (updated by GitHub Actions)
 
 - **Downtime goes to the root cause.** Otherwise the team fixes the symptom (cables) and the cause (power) keeps coming back.
 - **If a RESUME line is missing, the stop ends at the machine's next cycle report.** Without this, one lost line in the log would count days of downtime. The report says how many ends were inferred this way.
+- **Timing alone is not proof of cause.** The first version grouped any faults that happened within 10 seconds, and a daily report blamed a light curtain trip on one robot for a gripper fault on the next. Now only faults that can actually spread through the cell start a chain, and a test covers that exact case.
 - **The trend check is simple on purpose:** split the period in half and compare counts. It's easy to explain and hard to fool with one bad day.
 - **Standard library only.** It should run on any machine in a plant without installing anything.
 
 ## Limitations
 
 - **The logs are simulated.** Real controller logs are confidential, so `simulate.py` writes the kind of log a cell like this produces, with known problems hidden in it. Fault codes are generic examples, not a specific robot vendor's codes. A real controller export would need a small adapter in `parse.py`.
-- The chain rule only looks at timing. Two unrelated faults within 10 seconds would be grouped together. With real data I'd add rules about which faults can cause which.
+- Which faults can start a chain is a fixed list (`CAN_CASCADE` in `knowledge.py`). With real data I'd learn it from history: which faults are often followed by stops elsewhere.
 - Availability is based on fault stops only, not planned breaks or changeovers.
 
 ## Next steps
