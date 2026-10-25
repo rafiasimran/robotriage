@@ -65,6 +65,31 @@ def test_faults_far_apart_are_not_a_cascade():
     assert groups == [] and len(alone) == 2
 
 
+def test_coincidence_close_in_time_is_not_a_cascade():
+    # Seen in a real daily report: a light curtain trip on R3 and a gripper
+    # fault on R2 4.5 s later were grouped as one chain. Neither can stop
+    # another machine, so they must stay separate.
+    events = log(
+        ("12:04:49", "R3", "FAULT", "E-SAFE-01"), ("12:06:30", "R3", "INFO", "RESUME"),
+        ("12:04:53", "R2", "FAULT", "E-GRIP-01"), ("12:09:00", "R2", "INFO", "RESUME"),
+    )
+    groups, alone = cascades(stoppages(events), window_s=10)
+    assert groups == [] and len(alone) == 2
+
+
+def test_fault_already_in_a_chain_cannot_start_another():
+    events = log(
+        ("14:00:00", "PLC", "FAULT", "E-PWR-01"),
+        ("14:00:02", "R1", "FAULT", "E-COMM-02"),
+        ("14:00:05", "R3", "FAULT", "E-COMM-02"),
+        ("14:03:00", "PLC", "INFO", "RESUME"),
+        ("14:15:00", "R1", "INFO", "RESUME"),
+        ("14:15:00", "R3", "INFO", "RESUME"),
+    )
+    groups, alone = cascades(stoppages(events), window_s=10)
+    assert len(groups) == 1 and len(groups[0].followers) == 2 and not alone
+
+
 def test_rising_fault_is_flagged_as_worsening():
     rows = []
     # 1 fault in the first half of the day, 5 in the second half.
