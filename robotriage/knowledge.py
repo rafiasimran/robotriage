@@ -44,6 +44,11 @@ FAULTS = {
     },
 }
 
+# Faults that can knock out other machines. A power dip or a bus timeout
+# spreads through the cell; a light curtain trip or a worn suction cup on
+# one robot does not stop the robot next to it.
+CAN_CASCADE = {"E-PWR-01", "E-COMM-02"}
+
 UNKNOWN = {"name": "Unknown fault code", "causes": ["Code not in the knowledge base yet"], "checks": ["Look it up in the controller manual and add it to knowledge.py"]}
 
 
