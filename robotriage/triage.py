@@ -11,6 +11,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
 
+from .knowledge import CAN_CASCADE
 from .parse import Event
 
 RESUME = "RESUME"
@@ -71,30 +72,32 @@ def stoppages(events: list[Event]) -> list[Stoppage]:
     return sorted(done, key=lambda s: s.start)
 
 
-def cascades(stops: list[Stoppage], window_s: float = 10) -> tuple[list[Cascade], list[Stoppage]]:
-    """Group stoppages that start within `window_s` seconds of each other on different machines.
+def cascades(stops: list[Stoppage], window_s: float = 10,
+             can_start: set[str] = CAN_CASCADE) -> tuple[list[Cascade], list[Stoppage]]:
+    """Group stoppages that start within `window_s` seconds after a fault that can spread.
 
-    The first stoppage in a group is treated as the root cause and the rest
-    as follow-on faults. Returns (cascades, stoppages that were on their own).
+    Only faults in `can_start` (power dips, bus timeouts) can be the root of a
+    chain. Timing alone is not proof of cause: a light curtain trip on one
+    robot and a gripper fault on the next one a few seconds later are a
+    coincidence, not a chain. Returns (cascades, stoppages on their own).
     """
-    groups, alone = [], []
-    i = 0
-    while i < len(stops):
-        root = stops[i]
-        group = [root]
+    groups, used = [], set()
+    for i, root in enumerate(stops):
+        if i in used or root.code not in can_start:
+            continue
+        followers, devices = [], {root.device}
         j = i + 1
         while j < len(stops) and (stops[j].start - root.start).total_seconds() <= window_s:
-            if stops[j].device not in {s.device for s in group}:
-                group.append(stops[j])
-            else:
-                alone.append(stops[j])
+            if j not in used and stops[j].device not in devices:
+                followers.append(stops[j])
+                devices.add(stops[j].device)
+                used.add(j)
             j += 1
-        if len(group) > 1:
-            groups.append(Cascade(root, group[1:]))
-        else:
-            alone.append(root)
-        i = j
-    return groups, sorted(alone, key=lambda s: s.start)
+        if followers:
+            used.add(i)
+            groups.append(Cascade(root, followers))
+    alone = [s for k, s in enumerate(stops) if k not in used]
+    return groups, alone
 
 
 @dataclass
