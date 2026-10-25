@@ -4,7 +4,7 @@
 
 Automatic fault triage for a robot cell. It reads a week of machine logs and answers the three questions a maintenance team asks every Monday: **what stopped us, what actually caused it, and what should we fix first?**
 
-**[→ Latest report](reports/report.md)**, regenerated every morning by GitHub Actions.
+**[Latest report](reports/report.md)**, updated every morning by GitHub Actions.
 
 ## The problem
 
