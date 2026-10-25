@@ -1,0 +1,39 @@
+name: Daily triage
+on:
+  schedule:
+    - cron: "30 5 * * *"
+  workflow_dispatch:
+  push:
+    paths:
+      - "logs/**.log"
+permissions:
+  contents: write
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - run: pytest -q
+      - name: Pick a log (newest file in logs/, or simulate the last 7 days)
+        id: log
+        run: |
+          newest=$(ls -t logs/*.log 2>/dev/null | head -1 || true)
+          if [ -z "$newest" ]; then
+            start=$(date -u -d "7 days ago" +%F)
+            python -m robotriage.simulate logs/simulated.log --start "$start" --days 7 --seed "$(date -u +%Y%m%d)"
+            newest=logs/simulated.log
+          fi
+          echo "path=$newest" >> "$GITHUB_OUTPUT"
+      - name: Triage
+        run: python -m robotriage "${{ steps.log.outputs.path }}" --out reports
+      - name: Commit the report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/
+          git diff --cached --quiet || git commit -m "Update triage report"
+          git push
