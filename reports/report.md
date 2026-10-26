@@ -1,6 +1,6 @@
-# Robot cell triage report: 18 Oct 2026 – 24 Oct 2026
+# Robot cell triage report: 19 Oct 2026 – 25 Oct 2026
 
-Log lines read: 4,160 · unreadable lines skipped: 10 · stoppages found: 46 · total downtime: 6 h 14 min
+Log lines read: 4,156 · unreadable lines skipped: 10 · stoppages found: 46 · total downtime: 6 h 30 min
 
 ## Fix these first
 
@@ -8,11 +8,11 @@ Ranked by production time lost. Downtime of follow-on faults is counted under th
 
 | # | Fault | Where | Times | Downtime | of which caused on other machines |
 |---|---|---|---|---|---|
-| 1 | E-GRIP-01 Gripper vacuum below threshold | R2 | 24 | 2 h 19 min | – |
-| 2 | E-PWR-01 Supply voltage dip | PLC | 2 | 1 h 38 min | 1 h 32 min |
-| 3 | E-JNT-03 Joint 3 over-temperature | R4 | 3 | 1 h 7 min | – |
+| 1 | E-GRIP-01 Gripper vacuum below threshold | R2 | 25 | 2 h 19 min | – |
+| 2 | E-PWR-01 Supply voltage dip | PLC | 2 | 1 h 41 min | 1 h 36 min |
+| 3 | E-JNT-03 Joint 3 over-temperature | R4 | 3 | 1 h 27 min | – |
 | 4 | E-COLL-01 Collision detected | R1 | 1 | 25 min | – |
-| 5 | E-SAFE-01 Light curtain tripped | R2, R3, R4 | 6 | 22 min | 3 min |
+| 5 | E-CONV-01 Conveyor jam | CV1 | 3 | 22 min | – |
 
 **First checks for E-GRIP-01 (Gripper vacuum below threshold):**
 
@@ -22,9 +22,8 @@ Ranked by production time lost. Downtime of follow-on faults is counted under th
 
 ## One cause, many alarms
 
-- **Tue 20 Oct 06:03:56**: E-PWR-01 Supply voltage dip on PLC was followed within 3.2 s by R3 (E-COMM-02), R1 (E-COMM-02), R4 (E-COMM-02). Treat it as one problem: 46 min of downtime in total.
-- **Thu 22 Oct 12:04:49**: E-SAFE-01 Light curtain tripped on R3 was followed within 4.5 s by R2 (E-GRIP-01). Treat it as one problem: 4 min of downtime in total.
-- **Fri 23 Oct 06:02:51**: E-PWR-01 Supply voltage dip on PLC was followed within 2.5 s by R1 (E-COMM-02), R4 (E-COMM-02), R3 (E-COMM-02). Treat it as one problem: 52 min of downtime in total.
+- **Wed 21 Oct 22:04:41**: E-PWR-01 Supply voltage dip on PLC was followed within 3.6 s by R1 (E-COMM-02), R3 (E-COMM-02), R4 (E-COMM-02). Treat it as one problem: 50 min of downtime in total.
+- **Sat 24 Oct 14:04:44**: E-PWR-01 Supply voltage dip on PLC was followed within 2.1 s by R3 (E-COMM-02), R4 (E-COMM-02), R1 (E-COMM-02). Treat it as one problem: 51 min of downtime in total.
 
 ## Getting worse
 
@@ -37,10 +36,6 @@ Ranked by production time lost. Downtime of follow-on faults is counted under th
 | CV1 | 99.8 % |
 | PLC | 99.9 % |
 | R1 | 99.4 % |
-| R2 | 98.4 % |
-| R3 | 99.6 % |
-| R4 | 99.0 % |
-
-## Data notes
-
-- 1 stoppage(s) had no RESUME line; the end was taken from the next cycle report.
+| R2 | 98.6 % |
+| R3 | 99.7 % |
+| R4 | 98.8 % |
