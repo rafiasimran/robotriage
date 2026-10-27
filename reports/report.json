@@ -1,10 +1,10 @@
 {
   "source": "simulated.log",
-  "period": "19 Oct 2026 \u2013 25 Oct 2026",
-  "lines_ok": 4156,
+  "period": "20 Oct 2026 \u2013 26 Oct 2026",
+  "lines_ok": 4155,
   "lines_broken": 10,
   "n_stops": 46,
-  "downtime_min": 390.3,
+  "downtime_min": 388.9,
   "inferred_ends": 0,
   "open_stops": 0,
   "issues": [
@@ -13,10 +13,10 @@
       "devices": [
         "R2"
       ],
-      "count": 25,
-      "own_min": 139.3,
+      "count": 24,
+      "own_min": 131.8,
       "caused_min": 0.0,
-      "total_min": 139.3
+      "total_min": 131.8
     },
     {
       "code": "E-PWR-01",
@@ -24,9 +24,9 @@
         "PLC"
       ],
       "count": 2,
-      "own_min": 5.3,
-      "caused_min": 95.9,
-      "total_min": 101.2
+      "own_min": 5.0,
+      "caused_min": 101.2,
+      "total_min": 106.2
     },
     {
       "code": "E-JNT-03",
@@ -34,9 +34,19 @@
         "R4"
       ],
       "count": 3,
-      "own_min": 87.4,
+      "own_min": 82.8,
       "caused_min": 0.0,
-      "total_min": 87.4
+      "total_min": 82.8
+    },
+    {
+      "code": "E-CONV-01",
+      "devices": [
+        "CV1"
+      ],
+      "count": 3,
+      "own_min": 25.7,
+      "caused_min": 0.0,
+      "total_min": 25.7
     },
     {
       "code": "E-COLL-01",
@@ -49,31 +59,22 @@
       "total_min": 25.0
     },
     {
-      "code": "E-CONV-01",
-      "devices": [
-        "CV1"
-      ],
-      "count": 3,
-      "own_min": 22.5,
-      "caused_min": 0.0,
-      "total_min": 22.5
-    },
-    {
       "code": "E-SAFE-01",
       "devices": [
         "R1",
         "R2",
-        "R3"
+        "R3",
+        "R4"
       ],
-      "count": 6,
-      "own_min": 15.0,
+      "count": 7,
+      "own_min": 17.5,
       "caused_min": 0.0,
-      "total_min": 15.0
+      "total_min": 17.5
     }
   ],
   "cascades": [
     {
-      "start": "Wed 21 Oct 22:04:41",
+      "start": "Thu 22 Oct 06:04:12",
       "root_device": "PLC",
       "root_code": "E-PWR-01",
       "followers": [
@@ -90,11 +91,11 @@
           "code": "E-COMM-02"
         }
       ],
-      "spread_s": 3.6,
-      "minutes": 50.3
+      "spread_s": 2.7,
+      "minutes": 50.9
     },
     {
-      "start": "Sat 24 Oct 14:04:44",
+      "start": "Sun 25 Oct 14:01:04",
       "root_device": "PLC",
       "root_code": "E-PWR-01",
       "followers": [
@@ -103,41 +104,41 @@
           "code": "E-COMM-02"
         },
         {
-          "device": "R4",
+          "device": "R1",
           "code": "E-COMM-02"
         },
         {
-          "device": "R1",
+          "device": "R4",
           "code": "E-COMM-02"
         }
       ],
-      "spread_s": 2.1,
-      "minutes": 50.9
+      "spread_s": 3.0,
+      "minutes": 55.3
     }
   ],
   "worsening": [
     {
       "device": "R2",
       "code": "E-GRIP-01",
-      "first_half": 8,
-      "second_half": 17
+      "first_half": 4,
+      "second_half": 20
     }
   ],
   "availability": {
-    "CV1": 99.8,
-    "PLC": 99.9,
-    "R1": 99.4,
-    "R2": 98.6,
+    "CV1": 99.7,
+    "PLC": 100.0,
+    "R1": 99.3,
+    "R2": 98.7,
     "R3": 99.7,
     "R4": 98.8
   },
   "stops_per_day": {
-    "2026-10-19": 3,
-    "2026-10-20": 4,
-    "2026-10-21": 7,
+    "2026-10-20": 2,
+    "2026-10-21": 4,
     "2026-10-22": 7,
-    "2026-10-23": 6,
-    "2026-10-24": 11,
-    "2026-10-25": 8
+    "2026-10-23": 7,
+    "2026-10-24": 6,
+    "2026-10-25": 12,
+    "2026-10-26": 8
   }
 }
