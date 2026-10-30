@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RoboTriage dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<style>
+  :root { --bg:#ffffff; --fg:#1d2228; --muted:#68717c; --line:#e2e5e9; --card:#f6f7f9; --bar:#3b6ea5; --bad:#b3261e; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171a; --fg:#e4e7ea; --muted:#98a1ab; --line:#2a2f35; --card:#1b1f24; --bar:#6c9fd6; --bad:#f2827a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 22px; margin: 0; }
+  h2 { font-size: 17px; margin: 32px 0 10px; }
+  .sub { color: var(--muted); font-size: 13px; margin: 4px 0 20px; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+  .tile { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+  .tile b { display: block; font-size: 22px; }
+  .tile span { color: var(--muted); font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; }
+  td.num, th.num { text-align: right; }
+  .wrap { overflow-x: auto; }
+  ul { padding-left: 18px; }
+  li { margin-bottom: 6px; }
+  .bad { color: var(--bad); font-weight: 600; }
+  .chart { position: relative; height: 240px; }
+  footer { color: var(--muted); font-size: 13px; margin-top: 36px; }
+  a { color: var(--bar); }
+</style>
+</head>
+<body>
+<main>
+  <h1>RoboTriage: daily robot cell report</h1>
+  <p class="sub" id="period">Loading…</p>
+
+  <div class="tiles">
+    <div class="tile"><b id="stops">–</b><span>stoppages</span></div>
+    <div class="tile"><b id="downtime">–</b><span>total downtime</span></div>
+    <div class="tile"><b id="top">–</b><span>biggest problem</span></div>
+    <div class="tile"><b id="worse">–</b><span>getting worse</span></div>
+  </div>
+
+  <h2>Stoppages per day</h2>
+  <div class="chart"><canvas id="daily"></canvas></div>
+
+  <h2>Fix these first</h2>
+  <p class="sub">Ranked by production time lost. Downtime caused on other machines is counted under the root cause.</p>
+  <div class="wrap"><table id="issues"></table></div>
+
+  <h2>One cause, many alarms</h2>
+  <ul id="cascades"></ul>
+
+  <h2>Getting worse</h2>
+  <ul id="worsening"></ul>
+
+  <h2>Machines</h2>
+  <div class="wrap"><table id="machines"></table></div>
+
+  <footer>
+    Updated every morning by GitHub Actions. The logs are simulated, see the
+    <a href="https://github.com/rafiasimran/robotriage">repo</a> for details.
+  </footer>
+</main>
+
+<script>
+const NAMES = {
+  "E-PWR-01": "Supply voltage dip", "E-COMM-02": "Fieldbus timeout",
+  "E-GRIP-01": "Gripper vacuum low", "E-JNT-03": "Joint 3 over-temperature",
+  "E-COLL-01": "Collision detected", "E-SAFE-01": "Light curtain tripped",
+  "E-CONV-01": "Conveyor jam"
+};
+const name = c => NAMES[c] || c;
+const hm = m => { m = Math.round(m); return m >= 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m} min`; };
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+
+fetch("data.json", { cache: "no-store" })
+  .then(r => r.json())
+  .then(render)
+  .catch(() => { document.getElementById("period").textContent = "Could not load the latest report."; });
+
+function render(r) {
+  document.getElementById("period").textContent = `${r.period} · ${r.lines_ok.toLocaleString()} log lines · ${r.lines_broken} unreadable lines skipped`;
+  document.getElementById("stops").textContent = r.n_stops;
+  document.getElementById("downtime").textContent = hm(r.downtime_min);
+  const top = r.issues[0];
+  document.getElementById("top").textContent = top ? name(top.code) : "none";
+  document.getElementById("worse").textContent = r.worsening.length;
+
+  const days = Object.keys(r.stops_per_day);
+  const bar = getComputedStyle(document.documentElement).getPropertyValue("--bar").trim();
+  const muted = getComputedStyle(document.documentElement).getPropertyValue("--muted").trim();
+  new Chart(document.getElementById("daily"), {
+    type: "bar",
+    data: { labels: days.map(d => d.slice(5)), datasets: [{ data: days.map(d => r.stops_per_day[d]), backgroundColor: bar }] },
+    options: {
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { ticks: { color: muted }, grid: { display: false } },
+                y: { beginAtZero: true, ticks: { color: muted, precision: 0 } } }
+    }
+  });
+
+  document.getElementById("issues").innerHTML =
+    `<tr><th>#</th><th>Fault</th><th>Where</th><th class="num">Times</th><th class="num">Downtime</th><th class="num">Caused elsewhere</th></tr>` +
+    r.issues.map((it, i) => `<tr><td>${i + 1}</td><td>${esc(it.code)} ${esc(name(it.code))}</td><td>${esc(it.devices.join(", "))}</td>
+      <td class="num">${it.count}</td><td class="num">${hm(it.total_min)}</td><td class="num">${it.caused_min ? hm(it.caused_min) : "–"}</td></tr>`).join("");
+
+  document.getElementById("cascades").innerHTML = r.cascades.length
+    ? r.cascades.map(c => `<li><b>${esc(c.start)}</b>: ${esc(name(c.root_code))} on ${esc(c.root_device)}, followed within ${c.spread_s} s by
+        ${esc(c.followers.map(f => `${f.device} (${f.code})`).join(", "))}. ${hm(c.minutes)} downtime in total.</li>`).join("")
+    : "<li>No chains of faults found.</li>";
+
+  document.getElementById("worsening").innerHTML = r.worsening.length
+    ? r.worsening.map(w => `<li><span class="bad">${esc(w.device)} ${esc(name(w.code))}</span>: ${w.first_half} times in the first half, ${w.second_half} in the second half.</li>`).join("")
+    : "<li>Nothing is clearly getting more frequent.</li>";
+
+  const m = r.mtbf || {};
+  document.getElementById("machines").innerHTML =
+    `<tr><th>Machine</th><th class="num">Available</th><th class="num">Stops</th><th class="num">Mean time between failures</th></tr>` +
+    Object.entries(r.availability).map(([d, pct]) => {
+      const x = m[d] || {};
+      return `<tr><td>${esc(d)}</td><td class="num">${pct} %</td><td class="num">${x.stops ?? "–"}</td><td class="num">${x.mtbf_h != null ? x.mtbf_h + " h" : "no stops"}</td></tr>`;
+    }).join("");
+}
+</script>
+</body>
+</html>
