@@ -116,7 +116,7 @@ function render(r) {
     : "<li>No chains of faults found.</li>";
 
   document.getElementById("worsening").innerHTML = r.worsening.length
-    ? r.worsening.map(w => `<li><span class="bad">${esc(w.device)} ${esc(name(w.code))}</span>: ${w.first_half} times in the first half, ${w.second_half} in the second half.</li>`).join("")
+    ? r.worsening.map(w => `<li><span class="bad">${esc(w.device)} ${esc(name(w.code))}</span>: ${w.first_half} time${w.first_half === 1 ? "" : "s"} in the first half, ${w.second_half} in the second half.</li>`).join("")
     : "<li>Nothing is clearly getting more frequent.</li>";
 
   const m = r.mtbf || {};
