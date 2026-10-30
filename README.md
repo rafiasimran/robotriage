@@ -22,7 +22,8 @@ Engineers usually find these patterns by scrolling through logs by hand. RoboTri
 4. **Charges downtime to the root cause.** A network timeout caused by a power dip counts as power downtime.
 5. **Ranks problems by production time lost** and adds first checks for the top one from a small fault knowledge base.
 6. **Flags problems that are getting worse**, comparing the first and second half of the period.
-7. **Writes a report** in Markdown and JSON.
+7. **Calculates availability and mean time between failures (MTBF)** for each machine.
+8. **Writes a report** in Markdown and JSON.
 
 ```mermaid
 flowchart LR
@@ -67,14 +68,14 @@ Options: `--window 10` sets how many seconds apart faults can be to count as one
 
 ## Tests
 
-15 tests. The unit tests cover the tricky cases one by one: double faults on a stopped machine, a missing RESUME line, a stop that never ends, a real chain versus two faults that just happen close together. The end-to-end test generates a full week and checks that the pipeline finds every problem hidden in it, for several random seeds.
+16 tests. The unit tests cover the tricky cases one by one: double faults on a stopped machine, a missing RESUME line, a stop that never ends, a real chain versus two faults that just happen close together. The end-to-end test generates a full week and checks that the pipeline finds every problem hidden in it, for several random seeds.
 
 ## Project structure
 
 ```
 robotriage/
   parse.py       read log lines, count broken ones
-  triage.py      stoppages, cascades, ranking, trends, availability
+  triage.py      stoppages, cascades, ranking, trends, availability, MTBF
   knowledge.py   fault codes: meaning, likely causes, first checks
   report.py      Markdown + JSON report
   simulate.py    realistic week of logs with known problems hidden in it
@@ -95,12 +96,11 @@ reports/         latest report (updated by GitHub Actions)
 
 - **The logs are simulated.** Real controller logs are confidential, so `simulate.py` writes the kind of log a cell like this produces, with known problems hidden in it. Fault codes are generic examples, not a specific robot vendor's codes. A real controller export would need a small adapter in `parse.py`.
 - Which faults can start a chain is a fixed list (`CAN_CASCADE` in `knowledge.py`). With real data I'd learn it from history: which faults are often followed by stops elsewhere.
-- Availability is based on fault stops only, not planned breaks or changeovers.
+- Availability and MTBF are based on fault stops only, not planned breaks or changeovers. MTBF counts every stop on a machine, including ones caused by another machine's fault.
 
 ## Next steps
 
 - An adapter for a real controller log format
-- Mean time between failures per machine and fault
 - The same approach for other fault logs, such as wind turbine or solar inverter alarms
 
 ## Tech
