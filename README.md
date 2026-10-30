@@ -4,7 +4,9 @@
 
 Automatic fault triage for a robot cell. It reads a week of machine logs and answers the three questions a maintenance team asks every Monday: **what stopped us, what actually caused it, and what should we fix first?**
 
-**[Latest report](reports/report.md)**, updated every morning by GitHub Actions.
+**[Live dashboard](https://rafiasimran.github.io/robotriage/)** · **[Latest report](reports/report.md)**, both updated every morning by GitHub Actions.
+
+![Dashboard](docs/screenshot.png)
 
 ## The problem
 
@@ -64,7 +66,7 @@ Options: `--window 10` sets how many seconds apart faults can be to count as one
 ## Automation
 
 - **Tests** run on every push.
-- **Daily triage** runs every morning at 05:30 UTC. If there's a `.log` file in `logs/`, it triages the newest one. If not, it simulates the last 7 days and triages that. The new report is committed back to the repo. Dropping a log file into `logs/` and pushing also triggers a run.
+- **Daily triage** runs every morning at 05:30 UTC. If there's a `.log` file in `logs/`, it triages the newest one. If not, it simulates the last 7 days and triages that. The new report is committed back to the repo, and the dashboard in `docs/` (GitHub Pages) reads the same data. Dropping a log file into `logs/` and pushing also triggers a run.
 
 ## Tests
 
@@ -82,6 +84,7 @@ robotriage/
   __main__.py    command line entry point
 tests/
 reports/         latest report (updated by GitHub Actions)
+docs/            dashboard page for GitHub Pages
 ```
 
 ## Design decisions
@@ -105,7 +108,7 @@ reports/         latest report (updated by GitHub Actions)
 
 ## Tech
 
-Python · pytest · GitHub Actions
+Python · pytest · GitHub Actions · GitHub Pages · Chart.js
 
 ---
 
