@@ -56,11 +56,13 @@ def build(result: dict) -> str:
                    f"Plan maintenance before it turns into a long stop.")
     out.append("")
 
-    out.append("## Availability\n")
-    out.append("| Machine | Available |")
-    out.append("|---|---|")
+    out.append("## Availability and time between failures\n")
+    out.append("| Machine | Available | Stops | Mean time between failures |")
+    out.append("|---|---|---|---|")
     for dev, pct in r["availability"].items():
-        out.append(f"| {dev} | {pct} % |")
+        m = r.get("mtbf", {}).get(dev, {})
+        between = f"{m['mtbf_h']} h" if m.get("mtbf_h") is not None else "no stops"
+        out.append(f"| {dev} | {pct} % | {m.get('stops', 0)} | {between} |")
     out.append("")
 
     notes = []

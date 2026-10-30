@@ -8,7 +8,7 @@ from pathlib import Path
 
 from . import report
 from .parse import read_log
-from .triage import availability, cascades, daily_counts, rank_issues, stoppages, worsening
+from .triage import availability, cascades, daily_counts, mtbf, rank_issues, stoppages, worsening
 
 
 def analyse(path: str, window_s: float = 10) -> dict:
@@ -44,6 +44,7 @@ def analyse(path: str, window_s: float = 10) -> dict:
         ],
         "worsening": worsening(stops),
         "availability": availability(stops, devices, start, end),
+        "mtbf": mtbf(stops, devices, start, end),
         "stops_per_day": daily_counts(stops),
     }
 

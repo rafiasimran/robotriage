@@ -169,6 +169,26 @@ def availability(stops: list[Stoppage], devices: set[str], start: datetime, end:
     return {d: round(100 * (1 - down[d] / span), 1) for d in sorted(devices)}
 
 
+def mtbf(stops: list[Stoppage], devices: set[str], start: datetime, end: datetime) -> dict[str, dict]:
+    """Mean time between failures per machine, in hours.
+
+    Running time is the logged period minus the time the machine was stopped.
+    MTBF = running time / number of stops. Machines that never stopped get None,
+    because the period is too short to say anything about them.
+    """
+    span_h = (end - start).total_seconds() / 3600
+    count = defaultdict(int)
+    down_h = defaultdict(float)
+    for s in stops:
+        count[s.device] += 1
+        down_h[s.device] += (s.end - s.start).total_seconds() / 3600
+    out = {}
+    for d in sorted(devices):
+        n = count[d]
+        out[d] = {"stops": n, "mtbf_h": round((span_h - down_h[d]) / n, 1) if n else None}
+    return out
+
+
 def daily_counts(stops: list[Stoppage]) -> dict[str, int]:
     days = defaultdict(int)
     for s in stops:
