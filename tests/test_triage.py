@@ -1,5 +1,5 @@
 from robotriage.parse import parse_lines
-from robotriage.triage import cascades, rank_issues, stoppages, worsening
+from robotriage.triage import cascades, mtbf, rank_issues, stoppages, worsening
 
 
 def log(*rows):
@@ -100,3 +100,18 @@ def test_rising_fault_is_flagged_as_worsening():
     rows.append(("23:01:00", "R1", "INFO", "RESUME"))
     found = worsening(stoppages(log(*rows)))
     assert found and found[0]["device"] == "R2" and found[0]["code"] == "E-GRIP-01"
+
+
+def test_mtbf_is_running_time_divided_by_stops():
+    events = log(
+        ("00:00:00", "R1", "INFO", "CYCLE_OK"),
+        ("04:00:00", "R1", "FAULT", "E-GRIP-01"), ("05:00:00", "R1", "INFO", "RESUME"),
+        ("08:00:00", "R1", "FAULT", "E-GRIP-01"), ("09:00:00", "R1", "INFO", "RESUME"),
+        ("10:00:00", "R2", "INFO", "CYCLE_OK"),
+    )
+    stops = stoppages(events)
+    result = mtbf(stops, {"R1", "R2"}, events[0].time, events[-1].time)
+    # 10 h logged, 2 h stopped, 2 stops -> 4 h between failures.
+    assert result["R1"] == {"stops": 2, "mtbf_h": 4.0}
+    # R2 never stopped, so there is nothing to divide by.
+    assert result["R2"] == {"stops": 0, "mtbf_h": None}
