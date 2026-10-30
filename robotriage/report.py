@@ -11,6 +11,10 @@ def _h(minutes: float) -> str:
     return f"{m // 60} h {m % 60} min" if m >= 60 else f"{m} min"
 
 
+def _times(n: int) -> str:
+    return f"{n} time" if n == 1 else f"{n} times"
+
+
 def build(result: dict) -> str:
     r = result
     out = []
@@ -51,7 +55,7 @@ def build(result: dict) -> str:
         out.append("Nothing is clearly getting more frequent.\n")
     for w in r["worsening"]:
         info = describe(w["code"])
-        out.append(f"- **{w['device']} {w['code']} {info['name']}**: {w['first_half']} times in the first half of the period, "
+        out.append(f"- **{w['device']} {w['code']} {info['name']}**: {_times(w['first_half'])} in the first half of the period, "
                    f"{w['second_half']} in the second half. Likely: {info['causes'][0].lower()}. "
                    f"Plan maintenance before it turns into a long stop.")
     out.append("")
