@@ -1,10 +1,10 @@
 {
   "source": "simulated.log",
-  "period": "25 Oct 2026 \u2013 31 Oct 2026",
-  "lines_ok": 4157,
+  "period": "26 Oct 2026 \u2013 01 Nov 2026",
+  "lines_ok": 4151,
   "lines_broken": 10,
-  "n_stops": 45,
-  "downtime_min": 367.6,
+  "n_stops": 42,
+  "downtime_min": 377.0,
   "inferred_ends": 0,
   "open_stops": 0,
   "issues": [
@@ -13,10 +13,10 @@
       "devices": [
         "R2"
       ],
-      "count": 23,
-      "own_min": 126.6,
+      "count": 22,
+      "own_min": 124.3,
       "caused_min": 0.0,
-      "total_min": 126.6
+      "total_min": 124.3
     },
     {
       "code": "E-PWR-01",
@@ -25,8 +25,8 @@
       ],
       "count": 2,
       "own_min": 5.6,
-      "caused_min": 92.4,
-      "total_min": 98.0
+      "caused_min": 95.4,
+      "total_min": 101.0
     },
     {
       "code": "E-JNT-03",
@@ -34,9 +34,19 @@
         "R4"
       ],
       "count": 3,
-      "own_min": 81.6,
+      "own_min": 87.8,
       "caused_min": 0.0,
-      "total_min": 81.6
+      "total_min": 87.8
+    },
+    {
+      "code": "E-CONV-01",
+      "devices": [
+        "CV1"
+      ],
+      "count": 3,
+      "own_min": 28.1,
+      "caused_min": 0.0,
+      "total_min": 28.1
     },
     {
       "code": "E-COLL-01",
@@ -49,38 +59,25 @@
       "total_min": 25.0
     },
     {
-      "code": "E-CONV-01",
-      "devices": [
-        "CV1"
-      ],
-      "count": 3,
-      "own_min": 24.7,
-      "caused_min": 0.0,
-      "total_min": 24.7
-    },
-    {
       "code": "E-SAFE-01",
       "devices": [
+        "R1",
         "R2",
         "R3",
         "R4"
       ],
-      "count": 7,
-      "own_min": 11.7,
+      "count": 5,
+      "own_min": 10.8,
       "caused_min": 0.0,
-      "total_min": 11.7
+      "total_min": 10.8
     }
   ],
   "cascades": [
     {
-      "start": "Tue 27 Oct 06:05:49",
+      "start": "Wed 28 Oct 22:01:59",
       "root_device": "PLC",
       "root_code": "E-PWR-01",
       "followers": [
-        {
-          "device": "R1",
-          "code": "E-COMM-02"
-        },
         {
           "device": "R4",
           "code": "E-COMM-02"
@@ -88,20 +85,20 @@
         {
           "device": "R3",
           "code": "E-COMM-02"
+        },
+        {
+          "device": "R1",
+          "code": "E-COMM-02"
         }
       ],
-      "spread_s": 3.6,
-      "minutes": 47.2
+      "spread_s": 3.5,
+      "minutes": 51.6
     },
     {
-      "start": "Fri 30 Oct 22:03:38",
+      "start": "Sat 31 Oct 06:04:05",
       "root_device": "PLC",
       "root_code": "E-PWR-01",
       "followers": [
-        {
-          "device": "R4",
-          "code": "E-COMM-02"
-        },
         {
           "device": "R3",
           "code": "E-COMM-02"
@@ -109,22 +106,26 @@
         {
           "device": "R1",
           "code": "E-COMM-02"
+        },
+        {
+          "device": "R4",
+          "code": "E-COMM-02"
         }
       ],
-      "spread_s": 3.6,
-      "minutes": 50.9
+      "spread_s": 3.7,
+      "minutes": 49.4
     }
   ],
   "worsening": [
     {
       "device": "R2",
       "code": "E-GRIP-01",
-      "first_half": 3,
-      "second_half": 20
+      "first_half": 4,
+      "second_half": 18
     }
   ],
   "availability": {
-    "CV1": 99.8,
+    "CV1": 99.7,
     "PLC": 99.9,
     "R1": 99.4,
     "R2": 98.7,
@@ -141,29 +142,29 @@
       "mtbf_h": 83.9
     },
     "R1": {
-      "stops": 3,
-      "mtbf_h": 55.6
+      "stops": 4,
+      "mtbf_h": 41.7
     },
     "R2": {
-      "stops": 25,
-      "mtbf_h": 6.6
+      "stops": 24,
+      "mtbf_h": 6.9
     },
     "R3": {
-      "stops": 6,
-      "mtbf_h": 27.9
+      "stops": 3,
+      "mtbf_h": 55.8
     },
     "R4": {
       "stops": 6,
-      "mtbf_h": 27.7
+      "mtbf_h": 27.6
     }
   },
   "stops_per_day": {
-    "2026-10-25": 2,
     "2026-10-26": 3,
-    "2026-10-27": 7,
-    "2026-10-28": 6,
-    "2026-10-29": 6,
-    "2026-10-30": 12,
-    "2026-10-31": 9
+    "2026-10-27": 3,
+    "2026-10-28": 7,
+    "2026-10-29": 5,
+    "2026-10-30": 6,
+    "2026-10-31": 11,
+    "2026-11-01": 7
   }
 }

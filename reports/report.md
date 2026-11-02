@@ -1,6 +1,6 @@
-# Robot cell triage report: 25 Oct 2026 – 31 Oct 2026
+# Robot cell triage report: 26 Oct 2026 – 01 Nov 2026
 
-Log lines read: 4,157 · unreadable lines skipped: 10 · stoppages found: 45 · total downtime: 6 h 8 min
+Log lines read: 4,151 · unreadable lines skipped: 10 · stoppages found: 42 · total downtime: 6 h 17 min
 
 ## Fix these first
 
@@ -8,11 +8,11 @@ Ranked by production time lost. Downtime of follow-on faults is counted under th
 
 | # | Fault | Where | Times | Downtime | of which caused on other machines |
 |---|---|---|---|---|---|
-| 1 | E-GRIP-01 Gripper vacuum below threshold | R2 | 23 | 2 h 7 min | – |
-| 2 | E-PWR-01 Supply voltage dip | PLC | 2 | 1 h 38 min | 1 h 32 min |
-| 3 | E-JNT-03 Joint 3 over-temperature | R4 | 3 | 1 h 22 min | – |
-| 4 | E-COLL-01 Collision detected | R1 | 1 | 25 min | – |
-| 5 | E-CONV-01 Conveyor jam | CV1 | 3 | 25 min | – |
+| 1 | E-GRIP-01 Gripper vacuum below threshold | R2 | 22 | 2 h 4 min | – |
+| 2 | E-PWR-01 Supply voltage dip | PLC | 2 | 1 h 41 min | 1 h 35 min |
+| 3 | E-JNT-03 Joint 3 over-temperature | R4 | 3 | 1 h 28 min | – |
+| 4 | E-CONV-01 Conveyor jam | CV1 | 3 | 28 min | – |
+| 5 | E-COLL-01 Collision detected | R1 | 1 | 25 min | – |
 
 **First checks for E-GRIP-01 (Gripper vacuum below threshold):**
 
@@ -22,20 +22,20 @@ Ranked by production time lost. Downtime of follow-on faults is counted under th
 
 ## One cause, many alarms
 
-- **Tue 27 Oct 06:05:49**: E-PWR-01 Supply voltage dip on PLC was followed within 3.6 s by R1 (E-COMM-02), R4 (E-COMM-02), R3 (E-COMM-02). Treat it as one problem: 47 min of downtime in total.
-- **Fri 30 Oct 22:03:38**: E-PWR-01 Supply voltage dip on PLC was followed within 3.6 s by R4 (E-COMM-02), R3 (E-COMM-02), R1 (E-COMM-02). Treat it as one problem: 51 min of downtime in total.
+- **Wed 28 Oct 22:01:59**: E-PWR-01 Supply voltage dip on PLC was followed within 3.5 s by R4 (E-COMM-02), R3 (E-COMM-02), R1 (E-COMM-02). Treat it as one problem: 52 min of downtime in total.
+- **Sat 31 Oct 06:04:05**: E-PWR-01 Supply voltage dip on PLC was followed within 3.7 s by R3 (E-COMM-02), R1 (E-COMM-02), R4 (E-COMM-02). Treat it as one problem: 49 min of downtime in total.
 
 ## Getting worse
 
-- **R2 E-GRIP-01 Gripper vacuum below threshold**: 3 times in the first half of the period, 20 in the second half. Likely: worn suction cup. Plan maintenance before it turns into a long stop.
+- **R2 E-GRIP-01 Gripper vacuum below threshold**: 4 times in the first half of the period, 18 in the second half. Likely: worn suction cup. Plan maintenance before it turns into a long stop.
 
 ## Availability and time between failures
 
 | Machine | Available | Stops | Mean time between failures |
 |---|---|---|---|
-| CV1 | 99.8 % | 3 | 55.8 h |
+| CV1 | 99.7 % | 3 | 55.8 h |
 | PLC | 99.9 % | 2 | 83.9 h |
-| R1 | 99.4 % | 3 | 55.6 h |
-| R2 | 98.7 % | 25 | 6.6 h |
-| R3 | 99.7 % | 6 | 27.9 h |
-| R4 | 98.8 % | 6 | 27.7 h |
+| R1 | 99.4 % | 4 | 41.7 h |
+| R2 | 98.7 % | 24 | 6.9 h |
+| R3 | 99.7 % | 3 | 55.8 h |
+| R4 | 98.8 % | 6 | 27.6 h |
