@@ -111,7 +111,7 @@ def test_mtbf_is_running_time_divided_by_stops():
     )
     stops = stoppages(events)
     result = mtbf(stops, {"R1", "R2"}, events[0].time, events[-1].time)
-    # 10 h logged, 2 h stopped, 2 stops -> 4 h between failures.
-    assert result["R1"] == {"stops": 2, "mtbf_h": 4.0}
+    # 10 h logged, 2 h stopped, 2 stops -> 4 h between failures, 60 min to repair.
+    assert result["R1"] == {"stops": 2, "mtbf_h": 4.0, "mttr_min": 60.0}
     # R2 never stopped, so there is nothing to divide by.
-    assert result["R2"] == {"stops": 0, "mtbf_h": None}
+    assert result["R2"] == {"stops": 0, "mtbf_h": None, "mttr_min": None}
