@@ -29,9 +29,11 @@ jobs:
             newest=logs/simulated.log
           fi
           echo "path=$newest" >> "$GITHUB_OUTPUT"
-      - name: Triage
+      - name: Triage (with logs/shifts.json for planned breaks, if there is one)
         run: |
-          python -m robotriage "${{ steps.log.outputs.path }}" --out reports
+          calendar=""
+          if [ -f logs/shifts.json ]; then calendar="--calendar logs/shifts.json"; fi
+          python -m robotriage "${{ steps.log.outputs.path }}" --out reports $calendar
           cp reports/report.json docs/data.json
       - name: Commit the report
         run: |
