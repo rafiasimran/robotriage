@@ -1,6 +1,7 @@
 """Run the full triage on a log file.
 
     python -m robotriage logs/cell_week.log --out reports
+    python -m robotriage alarms.csv --columns time=Timestamp,device=Source,code=AlarmID,state=Event
 """
 
 import argparse
@@ -11,8 +12,8 @@ from .parse import read_log
 from .triage import availability, cascades, daily_counts, mtbf, rank_issues, stoppages, worsening
 
 
-def analyse(path: str, window_s: float = 10) -> dict:
-    events, broken = read_log(path)
+def analyse(path: str, window_s: float = 10, fmt: str = "auto", columns: dict | None = None) -> dict:
+    events, broken = read_log(path, fmt, columns)
     if not events:
         raise SystemExit(f"No readable events in {path}")
     stops = stoppages(events)
@@ -54,10 +55,15 @@ def main():
     p.add_argument("log")
     p.add_argument("--out", default="reports", help="folder for report.md and report.json")
     p.add_argument("--window", type=float, default=10, help="seconds between faults to count as one chain")
+    p.add_argument("--format", choices=["auto", "text", "csv"], default="auto",
+                   help="log format; auto picks csv for .csv files")
+    p.add_argument("--columns", default="",
+                   help="CSV column names if they differ, e.g. time=Timestamp,device=Source,code=AlarmID,state=Event")
     a = p.parse_args()
+    columns = dict(pair.split("=", 1) for pair in a.columns.split(",") if "=" in pair)
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
-    result = analyse(a.log, a.window)
+    result = analyse(a.log, a.window, a.format, columns)
     report.write(result, out / "report.md", out / "report.json")
     top = result["issues"][0]
     print(f"{result['n_stops']} stoppages, {result['downtime_min']:.0f} min downtime. "
