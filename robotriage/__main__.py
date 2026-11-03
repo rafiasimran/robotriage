@@ -2,32 +2,40 @@
 
     python -m robotriage logs/cell_week.log --out reports
     python -m robotriage alarms.csv --columns time=Timestamp,device=Source,code=AlarmID,state=Event
+    python -m robotriage logs/cell_week.log --calendar logs/shifts.json
 """
 
 import argparse
 from pathlib import Path
 
-from . import report
+from . import report, shifts
 from .parse import read_log
-from .triage import availability, cascades, daily_counts, mtbf, rank_issues, stoppages, worsening
+from .triage import (availability, cascades, daily_counts, mark_planned, mtbf, rank_issues, stoppages,
+                     worsening)
 
 
-def analyse(path: str, window_s: float = 10, fmt: str = "auto", columns: dict | None = None) -> dict:
+def analyse(path: str, window_s: float = 10, fmt: str = "auto", columns: dict | None = None,
+            calendar: dict | None = None) -> dict:
     events, broken = read_log(path, fmt, columns)
     if not events:
         raise SystemExit(f"No readable events in {path}")
+    start, end = events[0].time, events[-1].time
     stops = stoppages(events)
+    wins = shifts.windows(calendar, start, end) if calendar else []
+    mark_planned(stops, wins)
+    planned_s = shifts.total_s(wins)
     groups, alone = cascades(stops, window_s)
     issues = rank_issues(groups, alone)
     devices = {e.device for e in events}
-    start, end = events[0].time, events[-1].time
     return {
         "source": Path(path).name,
         "period": f"{start:%d %b %Y} – {end:%d %b %Y}",
         "lines_ok": len(events),
         "lines_broken": broken,
         "n_stops": len(stops),
-        "downtime_min": round(sum(s.minutes for s in stops), 1),
+        "downtime_min": round(sum(s.lost_minutes for s in stops), 1),
+        "planned_min": round(planned_s / 60, 1),
+        "stopped_in_planned_min": round(sum(s.planned_s for s in stops) / 60, 1),
         "inferred_ends": sum(s.end_inferred for s in stops),
         "open_stops": sum(s.still_open for s in stops),
         "issues": [
@@ -44,8 +52,8 @@ def analyse(path: str, window_s: float = 10, fmt: str = "auto", columns: dict | 
             for c in groups
         ],
         "worsening": worsening(stops),
-        "availability": availability(stops, devices, start, end),
-        "mtbf": mtbf(stops, devices, start, end),
+        "availability": availability(stops, devices, start, end, planned_s),
+        "mtbf": mtbf(stops, devices, start, end, planned_s),
         "stops_per_day": daily_counts(stops),
     }
 
@@ -59,11 +67,12 @@ def main():
                    help="log format; auto picks csv for .csv files")
     p.add_argument("--columns", default="",
                    help="CSV column names if they differ, e.g. time=Timestamp,device=Source,code=AlarmID,state=Event")
+    p.add_argument("--calendar", help="JSON file with planned breaks, changeovers and maintenance (see shifts.py)")
     a = p.parse_args()
     columns = dict(pair.split("=", 1) for pair in a.columns.split(",") if "=" in pair)
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
-    result = analyse(a.log, a.window, a.format, columns)
+    result = analyse(a.log, a.window, a.format, columns, shifts.load(a.calendar) if a.calendar else None)
     report.write(result, out / "report.md", out / "report.json")
     top = result["issues"][0]
     print(f"{result['n_stops']} stoppages, {result['downtime_min']:.0f} min downtime. "

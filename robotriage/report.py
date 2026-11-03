@@ -60,13 +60,18 @@ def build(result: dict) -> str:
                    f"Plan maintenance before it turns into a long stop.")
     out.append("")
 
-    out.append("## Availability and time between failures\n")
-    out.append("| Machine | Available | Stops | Mean time between failures |")
-    out.append("|---|---|---|---|")
+    out.append("## Availability, time between failures and time to repair\n")
+    if r.get("planned_min"):
+        out.append(f"Measured against planned production time. {_h(r['planned_min'])} of planned breaks and "
+                   f"maintenance are left out, and {_h(r.get('stopped_in_planned_min', 0))} of stops that fell "
+                   f"inside them are not counted as lost.\n")
+    out.append("| Machine | Available | Stops | Mean time between failures | Mean time to repair |")
+    out.append("|---|---|---|---|---|")
     for dev, pct in r["availability"].items():
         m = r.get("mtbf", {}).get(dev, {})
         between = f"{m['mtbf_h']} h" if m.get("mtbf_h") is not None else "no stops"
-        out.append(f"| {dev} | {pct} % | {m.get('stops', 0)} | {between} |")
+        repair = f"{m['mttr_min']} min" if m.get("mttr_min") is not None else "–"
+        out.append(f"| {dev} | {pct} % | {m.get('stops', 0)} | {between} | {repair} |")
     out.append("")
 
     notes = []

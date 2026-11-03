@@ -26,10 +26,16 @@ class Stoppage:
     end: datetime
     still_open: bool = False
     end_inferred: bool = False
+    planned_s: float = 0.0  # part of the stop that fell inside a planned break
 
     @property
     def minutes(self) -> float:
         return (self.end - self.start).total_seconds() / 60
+
+    @property
+    def lost_minutes(self) -> float:
+        """Production time actually lost: the stop minus any planned break inside it."""
+        return self.minutes - self.planned_s / 60
 
 
 @dataclass
@@ -39,7 +45,7 @@ class Cascade:
 
     @property
     def minutes(self) -> float:
-        return self.root.minutes + sum(s.minutes for s in self.followers)
+        return self.root.lost_minutes + sum(s.lost_minutes for s in self.followers)
 
 
 def stoppages(events: list[Event]) -> list[Stoppage]:
@@ -130,13 +136,13 @@ def rank_issues(groups: list[Cascade], alone: list[Stoppage]) -> list[Issue]:
         it = issue(s.code)
         it.devices.add(s.device)
         it.count += 1
-        it.own_minutes += s.minutes
+        it.own_minutes += s.lost_minutes
     for c in groups:
         it = issue(c.root.code)
         it.devices.add(c.root.device)
         it.count += 1
-        it.own_minutes += c.root.minutes
-        it.caused_minutes += sum(f.minutes for f in c.followers)
+        it.own_minutes += c.root.lost_minutes
+        it.caused_minutes += sum(f.lost_minutes for f in c.followers)
     return sorted(by_code.values(), key=lambda it: it.total_minutes, reverse=True)
 
 
@@ -160,32 +166,48 @@ def worsening(stops: list[Stoppage], min_count: int = 4) -> list[dict]:
     return sorted(found, key=lambda f: f["second_half"], reverse=True)
 
 
-def availability(stops: list[Stoppage], devices: set[str], start: datetime, end: datetime) -> dict[str, float]:
-    """Share of the logged time each device was not stopped (0-100%)."""
-    span = (end - start).total_seconds() or 1
-    down = defaultdict(float)
+def mark_planned(stops: list[Stoppage], wins) -> None:
+    """Record how much of each stop fell inside a planned window (see shifts.py)."""
+    from .shifts import overlap_s
     for s in stops:
-        down[s.device] += (s.end - s.start).total_seconds()
-    return {d: round(100 * (1 - down[d] / span), 1) for d in sorted(devices)}
+        s.planned_s = overlap_s(s.start, s.end, wins)
 
 
-def mtbf(stops: list[Stoppage], devices: set[str], start: datetime, end: datetime) -> dict[str, dict]:
-    """Mean time between failures per machine, in hours.
+def availability(stops: list[Stoppage], devices: set[str], start: datetime, end: datetime,
+                 planned_s: float = 0.0) -> dict[str, float]:
+    """Share of planned production time each device was running (0-100%).
 
-    Running time is the logged period minus the time the machine was stopped.
-    MTBF = running time / number of stops. Machines that never stopped get None,
-    because the period is too short to say anything about them.
+    Planned production time is the logged period minus planned breaks.
+    Only lost time counts against it, so a stop during a break does not.
     """
-    span_h = (end - start).total_seconds() / 3600
+    production = ((end - start).total_seconds() - planned_s) or 1
+    lost = defaultdict(float)
+    for s in stops:
+        lost[s.device] += s.lost_minutes * 60
+    return {d: round(100 * (1 - lost[d] / production), 1) for d in sorted(devices)}
+
+
+def mtbf(stops: list[Stoppage], devices: set[str], start: datetime, end: datetime,
+         planned_s: float = 0.0) -> dict[str, dict]:
+    """Mean time between failures (hours) and mean time to repair (minutes) per machine.
+
+    Running time is planned production time minus the time lost to stops.
+    MTBF = running time / number of stops, MTTR = lost time / number of stops.
+    Machines that never stopped get None for both, because the period is too
+    short to say anything about them.
+    """
+    production_h = ((end - start).total_seconds() - planned_s) / 3600
     count = defaultdict(int)
-    down_h = defaultdict(float)
+    lost_min = defaultdict(float)
     for s in stops:
         count[s.device] += 1
-        down_h[s.device] += (s.end - s.start).total_seconds() / 3600
+        lost_min[s.device] += s.lost_minutes
     out = {}
     for d in sorted(devices):
         n = count[d]
-        out[d] = {"stops": n, "mtbf_h": round((span_h - down_h[d]) / n, 1) if n else None}
+        out[d] = {"stops": n,
+                  "mtbf_h": round((production_h - lost_min[d] / 60) / n, 1) if n else None,
+                  "mttr_min": round(lost_min[d] / n, 1) if n else None}
     return out
 
 
