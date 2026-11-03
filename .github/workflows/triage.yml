@@ -6,6 +6,7 @@ on:
   push:
     paths:
       - "logs/**.log"
+      - "logs/**.csv"
 permissions:
   contents: write
 jobs:
@@ -18,10 +19,10 @@ jobs:
           python-version: "3.12"
       - run: pip install -r requirements-dev.txt
       - run: pytest -q
-      - name: Pick a log (newest file in logs/, or simulate the last 7 days)
+      - name: Pick a log (newest .log or .csv in logs/, or simulate the last 7 days)
         id: log
         run: |
-          newest=$(ls -t logs/*.log 2>/dev/null | head -1 || true)
+          newest=$(ls -t logs/*.log logs/*.csv 2>/dev/null | head -1 || true)
           if [ -z "$newest" ]; then
             start=$(date -u -d "7 days ago" +%F)
             python -m robotriage.simulate logs/simulated.log --start "$start" --days 7 --seed "$(date -u +%Y%m%d)"
