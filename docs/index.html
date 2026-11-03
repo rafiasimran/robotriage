@@ -121,10 +121,10 @@ function render(r) {
 
   const m = r.mtbf || {};
   document.getElementById("machines").innerHTML =
-    `<tr><th>Machine</th><th class="num">Available</th><th class="num">Stops</th><th class="num">Mean time between failures</th></tr>` +
+    `<tr><th>Machine</th><th class="num">Available</th><th class="num">Stops</th><th class="num">Mean time between failures</th><th class="num">Mean time to repair</th></tr>` +
     Object.entries(r.availability).map(([d, pct]) => {
       const x = m[d] || {};
-      return `<tr><td>${esc(d)}</td><td class="num">${pct} %</td><td class="num">${x.stops ?? "–"}</td><td class="num">${x.mtbf_h != null ? x.mtbf_h + " h" : "no stops"}</td></tr>`;
+      return `<tr><td>${esc(d)}</td><td class="num">${pct} %</td><td class="num">${x.stops ?? "–"}</td><td class="num">${x.mtbf_h != null ? x.mtbf_h + " h" : "no stops"}</td><td class="num">${x.mttr_min != null ? x.mttr_min + " min" : "–"}</td></tr>`;
     }).join("");
 }
 </script>
