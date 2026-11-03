@@ -1,5 +1,5 @@
 from robotriage.parse import parse_lines
-from robotriage.triage import cascades, mtbf, rank_issues, stoppages, worsening
+from robotriage.triage import cascades, learn_spreaders, mtbf, rank_issues, stoppages, worsening
 
 
 def log(*rows):
@@ -111,7 +111,32 @@ def test_mtbf_is_running_time_divided_by_stops():
     )
     stops = stoppages(events)
     result = mtbf(stops, {"R1", "R2"}, events[0].time, events[-1].time)
-    # 10 h logged, 2 h stopped, 2 stops -> 4 h between failures, 60 min to repair.
-    assert result["R1"] == {"stops": 2, "mtbf_h": 4.0, "mttr_min": 60.0}
+    # 10 h logged, 2 h stopped, 2 stops -> 4 h between failures.
+    assert result["R1"] == {"stops": 2, "mtbf_h": 4.0}
     # R2 never stopped, so there is nothing to divide by.
-    assert result["R2"] == {"stops": 0, "mtbf_h": None, "mttr_min": None}
+    assert result["R2"] == {"stops": 0, "mtbf_h": None}
+
+
+def test_learns_that_power_dips_spread_but_their_followers_do_not():
+    rows = []
+    # Two power dips, each followed by fieldbus timeouts on two robots.
+    for h in ("02", "14"):
+        rows += [(f"{h}:00:00", "PLC", "FAULT", "E-PWR-01"), (f"{h}:00:02", "R1", "FAULT", "E-COMM-02"),
+                 (f"{h}:00:03", "R3", "FAULT", "E-COMM-02"), (f"{h}:03:00", "PLC", "INFO", "RESUME"),
+                 (f"{h}:15:00", "R1", "INFO", "RESUME"), (f"{h}:15:00", "R3", "INFO", "RESUME")]
+    # Background stops on their own.
+    for t in ("05:00:00", "08:00:00", "11:00:00", "17:00:00", "20:00:00"):
+        rows += [(t, "R2", "FAULT", "E-GRIP-01"), (f"{t[:3]}05:00", "R2", "INFO", "RESUME")]
+    learned = {r["code"]: r for r in learn_spreaders(stoppages(log(*rows)))}
+    assert learned["E-PWR-01"]["spreads"]
+    # The timeouts follow each other, but they came after the dip, so they are not causes.
+    assert not learned["E-COMM-02"]["spreads"]
+    assert not learned["E-GRIP-01"]["spreads"]
+
+
+def test_one_coincidence_is_not_enough_to_learn_a_chain():
+    rows = [("12:04:49", "R3", "FAULT", "E-SAFE-01"), ("12:06:30", "R3", "INFO", "RESUME"),
+            ("12:04:53", "R2", "FAULT", "E-GRIP-01"), ("12:09:00", "R2", "INFO", "RESUME"),
+            ("18:00:00", "R3", "FAULT", "E-SAFE-01"), ("18:02:00", "R3", "INFO", "RESUME")]
+    learned = {r["code"]: r for r in learn_spreaders(stoppages(log(*rows)))}
+    assert not learned["E-SAFE-01"]["spreads"]

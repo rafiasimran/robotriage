@@ -7,10 +7,10 @@ from robotriage.report import build
 from robotriage.simulate import generate
 
 
-def week(tmp_path, seed=7):
+def week(tmp_path, seed=7, learn_chains=False):
     path = tmp_path / "cell.log"
     path.write_text("\n".join(generate(datetime(2026, 10, 19), days=7, seed=seed)) + "\n", encoding="utf-8")
-    return analyse(str(path))
+    return analyse(str(path), learn_chains=learn_chains)
 
 
 def test_finds_the_hidden_problems(tmp_path):
@@ -34,6 +34,14 @@ def test_works_for_other_seeds(tmp_path):
         r = week(tmp_path, seed)
         assert len(r["cascades"]) == 2
         assert "E-COMM-02" not in [i["code"] for i in r["issues"]]
+
+
+def test_learning_from_the_log_finds_the_same_chains(tmp_path):
+    for seed in (7, 1, 2, 3):
+        r = week(tmp_path, seed, learn_chains=True)
+        assert [x["code"] for x in r["learned_spreaders"] if x["spreads"]] == ["E-PWR-01"]
+        assert len(r["cascades"]) == 2
+        assert r["issues"] == week(tmp_path, seed)["issues"]
 
 
 def test_report_has_all_sections(tmp_path):
