@@ -106,6 +106,58 @@ def cascades(stops: list[Stoppage], window_s: float = 10,
     return groups, alone
 
 
+def learn_spreaders(stops: list[Stoppage], window_s: float = 10, min_count: int = 2,
+                    min_share: float = 0.5, min_lift: float = 10) -> list[dict]:
+    """Learn from the log which fault codes knock out other machines.
+
+    For each code, look at the stops where it came first, with no other
+    machine already stopping in the seconds before it, and count how often a
+    stop on a different machine followed within `window_s` seconds.
+
+    That share is compared with chance: how likely is it that some other
+    machine starts a stop in any `window_s`-second slot of this log? The
+    ratio is the lift. A code is a candidate when it was followed by another
+    stop at least `min_count` times, at least `min_share` of the time, and
+    the lift is at least `min_lift`. Asking for repeats matters: in a short
+    log a single coincidence already gives a huge lift.
+
+    Looking only at stops that came first matters. Three robots losing the
+    fieldbus within seconds all follow each other, but none of them caused
+    the others; the power dip before them did.
+
+    Returns every code with its numbers, sorted by lift, with a 'spreads'
+    flag. An engineer should confirm the list before it replaces the fixed
+    one in knowledge.py.
+    """
+    if len(stops) < 2:
+        return []
+    span = (stops[-1].start - stops[0].start).total_seconds() or 1
+    chance = min(1.0, len(stops) * window_s / span)
+
+    def gap(a, b):
+        return (b.start - a.start).total_seconds()
+
+    stats = defaultdict(lambda: {"count": 0, "first": 0, "followed": 0})
+    for i, s in enumerate(stops):
+        st = stats[s.code]
+        st["count"] += 1
+        before = any(0 < gap(p, s) <= window_s and p.device != s.device for p in stops[max(0, i - 50):i])
+        if before:
+            continue
+        st["first"] += 1
+        if any(0 <= gap(s, n) <= window_s and n.device != s.device for n in stops[i + 1:i + 51]):
+            st["followed"] += 1
+
+    out = []
+    for code, st in stats.items():
+        share = st["followed"] / st["count"]
+        lift = share / chance
+        out.append({"code": code, "count": st["count"], "followed": st["followed"],
+                    "share": round(share, 2), "lift": round(lift, 1),
+                    "spreads": st["followed"] >= min_count and share >= min_share and lift >= min_lift})
+    return sorted(out, key=lambda r: (-r["lift"], r["code"]))
+
+
 @dataclass
 class Issue:
     code: str

@@ -50,6 +50,19 @@ def build(result: dict) -> str:
                    f"Treat it as one problem: {_h(c['minutes'])} of downtime in total.")
     out.append("")
 
+    learned = r.get("learned_spreaders", [])
+    if learned:
+        out.append("### Which faults spread, learned from this log\n")
+        out.append(f"Chains above are started by {r.get('chains_from', 'the list in knowledge.py')}. "
+                   "This table checks that list against the log: how often each fault was followed by a stop "
+                   "on another machine within seconds, compared with chance.\n")
+        out.append("| Fault | Times | Followed by another stop | Lift over chance | Spreads? | In knowledge.py |")
+        out.append("|---|---|---|---|---|---|")
+        for x in learned:
+            out.append(f"| {x['code']} {describe(x['code'])['name']} | {x['count']} | {x['followed']} | "
+                       f"{x['lift']}x | {'yes' if x['spreads'] else 'no'} | {'yes' if x['in_knowledge'] else 'no'} |")
+        out.append("")
+
     out.append("## Getting worse\n")
     if not r["worsening"]:
         out.append("Nothing is clearly getting more frequent.\n")
