@@ -1,10 +1,10 @@
 {
   "source": "simulated.log",
-  "period": "11 Nov 2026 \u2013 17 Nov 2026",
-  "lines_ok": 4155,
+  "period": "12 Nov 2026 \u2013 18 Nov 2026",
+  "lines_ok": 4158,
   "lines_broken": 10,
-  "n_stops": 44,
-  "downtime_min": 354.0,
+  "n_stops": 46,
+  "downtime_min": 375.8,
   "planned_min": 0.0,
   "stopped_in_planned_min": 0.0,
   "inferred_ends": 0,
@@ -15,10 +15,10 @@
       "devices": [
         "R2"
       ],
-      "count": 22,
-      "own_min": 122.3,
+      "count": 25,
+      "own_min": 134.6,
       "caused_min": 0.0,
-      "total_min": 122.3
+      "total_min": 134.6
     },
     {
       "code": "E-PWR-01",
@@ -26,9 +26,9 @@
         "PLC"
       ],
       "count": 2,
-      "own_min": 4.8,
-      "caused_min": 92.9,
-      "total_min": 97.8
+      "own_min": 5.6,
+      "caused_min": 98.7,
+      "total_min": 104.3
     },
     {
       "code": "E-JNT-03",
@@ -36,9 +36,9 @@
         "R4"
       ],
       "count": 3,
-      "own_min": 72.9,
+      "own_min": 82.8,
       "caused_min": 0.0,
-      "total_min": 72.9
+      "total_min": 82.8
     },
     {
       "code": "E-COLL-01",
@@ -56,26 +56,26 @@
         "CV1"
       ],
       "count": 3,
-      "own_min": 20.2,
+      "own_min": 19.0,
       "caused_min": 0.0,
-      "total_min": 20.2
+      "total_min": 19.0
     },
     {
       "code": "E-SAFE-01",
       "devices": [
         "R1",
-        "R3",
+        "R2",
         "R4"
       ],
-      "count": 7,
-      "own_min": 15.9,
+      "count": 6,
+      "own_min": 10.2,
       "caused_min": 0.0,
-      "total_min": 15.9
+      "total_min": 10.2
     }
   ],
   "cascades": [
     {
-      "start": "Fri 13 Nov 14:02:45",
+      "start": "Sat 14 Nov 06:01:32",
       "root_device": "PLC",
       "root_code": "E-PWR-01",
       "followers": [
@@ -92,20 +92,20 @@
           "code": "E-COMM-02"
         }
       ],
-      "spread_s": 3.8,
-      "minutes": 49.9
+      "spread_s": 3.0,
+      "minutes": 52.3
     },
     {
-      "start": "Mon 16 Nov 06:04:02",
+      "start": "Tue 17 Nov 22:03:57",
       "root_device": "PLC",
       "root_code": "E-PWR-01",
       "followers": [
         {
-          "device": "R1",
+          "device": "R4",
           "code": "E-COMM-02"
         },
         {
-          "device": "R4",
+          "device": "R1",
           "code": "E-COMM-02"
         },
         {
@@ -113,8 +113,8 @@
           "code": "E-COMM-02"
         }
       ],
-      "spread_s": 2.1,
-      "minutes": 47.9
+      "spread_s": 3.7,
+      "minutes": 52.0
     }
   ],
   "chains_from": "the list in knowledge.py",
@@ -124,7 +124,7 @@
       "count": 2,
       "followed": 2,
       "share": 1.0,
-      "lift": 1289.1,
+      "lift": 1262.3,
       "spreads": true,
       "in_knowledge": true
     },
@@ -142,15 +142,15 @@
     {
       "device": "R2",
       "code": "E-GRIP-01",
-      "first_half": 7,
-      "second_half": 15
+      "first_half": 6,
+      "second_half": 19
     }
   ],
   "availability": {
     "CV1": 99.8,
-    "PLC": 100.0,
+    "PLC": 99.9,
     "R1": 99.4,
-    "R2": 98.8,
+    "R2": 98.6,
     "R3": 99.6,
     "R4": 98.9
   },
@@ -158,41 +158,41 @@
     "CV1": {
       "stops": 3,
       "mtbf_h": 55.8,
-      "mttr_min": 6.7
+      "mttr_min": 6.3
     },
     "PLC": {
       "stops": 2,
       "mtbf_h": 83.9,
-      "mttr_min": 2.4
+      "mttr_min": 2.8
     },
     "R1": {
-      "stops": 6,
-      "mtbf_h": 27.8,
-      "mttr_min": 9.4
+      "stops": 5,
+      "mtbf_h": 33.4,
+      "mttr_min": 11.6
     },
     "R2": {
-      "stops": 22,
-      "mtbf_h": 7.5,
-      "mttr_min": 5.6
+      "stops": 28,
+      "mtbf_h": 5.9,
+      "mttr_min": 5.0
     },
     "R3": {
-      "stops": 4,
-      "mtbf_h": 41.8,
-      "mttr_min": 9.8
+      "stops": 2,
+      "mtbf_h": 83.6,
+      "mttr_min": 18.6
     },
     "R4": {
-      "stops": 7,
-      "mtbf_h": 23.7,
-      "mttr_min": 15.9
+      "stops": 6,
+      "mtbf_h": 27.7,
+      "mttr_min": 19.2
     }
   },
   "stops_per_day": {
-    "2026-11-11": 3,
     "2026-11-12": 3,
-    "2026-11-13": 7,
-    "2026-11-14": 6,
-    "2026-11-15": 6,
-    "2026-11-16": 11,
-    "2026-11-17": 8
+    "2026-11-13": 2,
+    "2026-11-14": 7,
+    "2026-11-15": 7,
+    "2026-11-16": 7,
+    "2026-11-17": 11,
+    "2026-11-18": 9
   }
 }
