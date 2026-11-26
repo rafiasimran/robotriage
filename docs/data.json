@@ -1,10 +1,10 @@
 {
   "source": "simulated.log",
-  "period": "18 Nov 2026 \u2013 24 Nov 2026",
-  "lines_ok": 4162,
+  "period": "19 Nov 2026 \u2013 25 Nov 2026",
+  "lines_ok": 4157,
   "lines_broken": 10,
   "n_stops": 46,
-  "downtime_min": 380.1,
+  "downtime_min": 371.0,
   "planned_min": 0.0,
   "stopped_in_planned_min": 0.0,
   "inferred_ends": 0,
@@ -16,9 +16,9 @@
         "R2"
       ],
       "count": 24,
-      "own_min": 133.6,
+      "own_min": 143.2,
       "caused_min": 0.0,
-      "total_min": 133.6
+      "total_min": 143.2
     },
     {
       "code": "E-PWR-01",
@@ -26,9 +26,9 @@
         "PLC"
       ],
       "count": 2,
-      "own_min": 6.6,
-      "caused_min": 96.9,
-      "total_min": 103.5
+      "own_min": 5.3,
+      "caused_min": 94.8,
+      "total_min": 100.1
     },
     {
       "code": "E-JNT-03",
@@ -36,9 +36,9 @@
         "R4"
       ],
       "count": 3,
-      "own_min": 82.3,
+      "own_min": 73.3,
       "caused_min": 0.0,
-      "total_min": 82.3
+      "total_min": 73.3
     },
     {
       "code": "E-COLL-01",
@@ -56,34 +56,29 @@
         "CV1"
       ],
       "count": 3,
-      "own_min": 23.0,
+      "own_min": 16.2,
       "caused_min": 0.0,
-      "total_min": 23.0
+      "total_min": 16.2
     },
     {
       "code": "E-SAFE-01",
       "devices": [
         "R1",
-        "R2",
         "R3",
         "R4"
       ],
       "count": 7,
-      "own_min": 12.6,
+      "own_min": 13.2,
       "caused_min": 0.0,
-      "total_min": 12.6
+      "total_min": 13.2
     }
   ],
   "cascades": [
     {
-      "start": "Fri 20 Nov 22:03:55",
+      "start": "Sat 21 Nov 06:02:36",
       "root_device": "PLC",
       "root_code": "E-PWR-01",
       "followers": [
-        {
-          "device": "R1",
-          "code": "E-COMM-02"
-        },
         {
           "device": "R4",
           "code": "E-COMM-02"
@@ -91,16 +86,24 @@
         {
           "device": "R3",
           "code": "E-COMM-02"
+        },
+        {
+          "device": "R1",
+          "code": "E-COMM-02"
         }
       ],
-      "spread_s": 3.2,
-      "minutes": 45.1
+      "spread_s": 2.5,
+      "minutes": 50.3
     },
     {
-      "start": "Mon 23 Nov 14:00:52",
+      "start": "Tue 24 Nov 14:03:42",
       "root_device": "PLC",
       "root_code": "E-PWR-01",
       "followers": [
+        {
+          "device": "R4",
+          "code": "E-COMM-02"
+        },
         {
           "device": "R3",
           "code": "E-COMM-02"
@@ -108,14 +111,10 @@
         {
           "device": "R1",
           "code": "E-COMM-02"
-        },
-        {
-          "device": "R4",
-          "code": "E-COMM-02"
         }
       ],
-      "spread_s": 3.4,
-      "minutes": 58.4
+      "spread_s": 3.0,
+      "minutes": 49.8
     }
   ],
   "chains_from": "the list in knowledge.py",
@@ -125,7 +124,7 @@
       "count": 2,
       "followed": 2,
       "share": 1.0,
-      "lift": 1172.7,
+      "lift": 1255.8,
       "spreads": true,
       "in_knowledge": true
     },
@@ -143,8 +142,8 @@
     {
       "device": "R2",
       "code": "E-GRIP-01",
-      "first_half": 8,
-      "second_half": 16
+      "first_half": 6,
+      "second_half": 18
     }
   ],
   "availability": {
@@ -152,48 +151,48 @@
     "PLC": 99.9,
     "R1": 99.4,
     "R2": 98.6,
-    "R3": 99.6,
-    "R4": 98.8
+    "R3": 99.7,
+    "R4": 98.9
   },
   "mtbf": {
     "CV1": {
       "stops": 3,
-      "mtbf_h": 55.8,
-      "mttr_min": 7.7
+      "mtbf_h": 55.9,
+      "mttr_min": 5.4
     },
     "PLC": {
       "stops": 2,
       "mtbf_h": 83.9,
-      "mttr_min": 3.3
+      "mttr_min": 2.7
     },
     "R1": {
-      "stops": 4,
-      "mtbf_h": 41.7,
-      "mttr_min": 14.5
+      "stops": 6,
+      "mtbf_h": 27.8,
+      "mttr_min": 10.8
     },
     "R2": {
-      "stops": 27,
-      "mtbf_h": 6.1,
-      "mttr_min": 5.2
+      "stops": 24,
+      "mtbf_h": 6.9,
+      "mttr_min": 6.0
     },
     "R3": {
-      "stops": 4,
-      "mtbf_h": 41.8,
-      "mttr_min": 9.2
+      "stops": 3,
+      "mtbf_h": 55.8,
+      "mttr_min": 9.5
     },
     "R4": {
-      "stops": 6,
-      "mtbf_h": 27.7,
-      "mttr_min": 19.4
+      "stops": 8,
+      "mtbf_h": 20.7,
+      "mttr_min": 14.1
     }
   },
   "stops_per_day": {
-    "2026-11-18": 3,
-    "2026-11-19": 4,
-    "2026-11-20": 8,
-    "2026-11-21": 6,
+    "2026-11-19": 3,
+    "2026-11-20": 4,
+    "2026-11-21": 7,
     "2026-11-22": 6,
-    "2026-11-23": 11,
-    "2026-11-24": 8
+    "2026-11-23": 6,
+    "2026-11-24": 12,
+    "2026-11-25": 8
   }
 }
